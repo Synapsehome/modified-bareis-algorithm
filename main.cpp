@@ -1,118 +1,211 @@
 #include <stdio.h>
 #include <inttypes.h>
+#include <vector>
 
-#define A 4
-#define B 8
+#define MAIN_MATRIX  0
+#define ADDED_MATRIX 1
 
-int32_t matrix [A][B] = {{7, 1, 2, 8, 1, 0, 0, 0},
-                         {6, 7, 8, 9, 0, 1, 0, 0},
-                         {5, 5, 6, 7, 0, 0, 1, 0},
-                         {7, 1, 2, 3, 0, 0, 0, 1}
-                         };
-
-int32_t
-get_item(int32_t i, int32_t j)
+struct elem_t
 {
-    return matrix[i][j];
-}
+    int32_t val,        // val - значение эелемента в исходной матрице
+            added_val,   // значение в присоединённой единичной матрице
+            div,        // div - на что его потом поделить
+            i, j;       // индексы в матрице
+};
 
-int32_t
-set_item(int32_t i, int32_t j, int32_t val)
+class CBareisMatrix
 {
-    matrix[i][j] = val;
-}
+    public:
+        int32_t size;
+        std::vector<elem_t> elems;
 
-void
-copy_matrix(int32_t dst[A][B], int32_t src[A][B])
-{
-    int32_t i, j;
-    for (i = 0; i < A; i++) {
-        for (j = 0; j < B; j++) {
-            dst[i][j] = src[i][j];
+        void add(int32_t i, int32_t j, int32_t val)
+        {
+            elem_t e;
+            e.i = i;
+            e.j = j;
+            e.val = val;
+            e.div = 1;
+            e.added_val = (i == j) ? 1 : 0;
+            elems.push_back(e);
         }
-    }
-}
 
-void print(int32_t m[A][B]);
-
-int32_t bareis1(int32_t m[A][B], int32_t p, int32_t index)
-{
-    int32_t tmp[A][B];
-    int32_t i, j;
-    
-    //i = 1; j = 0;
-    for (i = 0; i < A; i++) {
-        for (j = 0; j < B; j++) {
-            if (i != index) {
-                tmp[i][j] = (m[index][index] * m[i][j] - 
-                            m[i][index] * m[index][j]) / p;
-            }
-        }
-    }
-
-    for (i = 0; i < B; i++) {
-        tmp[index][i] = m[index][i];
-    }
-    copy_matrix(matrix, tmp);
-    return m[index][index];
-}
-
-/*void
-bareis()
-{
-    int32_t i, ti, tj, p = 1;
-
-    for (i = 0; i < 4; i++) {
-        int32_t tmp[4][4] = {0};
-        for (ti = 0; ti < 4; ti++) {
-            for (tj = 0; tj < 4; tj++) {
-                if (ti != i) {
-                    int32_t val = (get_item(i, i) * get_item(ti, tj) - 
-                              get_item(ti, i) * get_item(i, tj)) / p;
-                    tmp[ti][tj] = val;
+        void create_added_matrix()
+        {
+            for (int32_t i = 1; i <= size; i++) {
+                for (int32_t j = size + 1; j <= size * 2; j++) {
+                    elem_t e;
+                    e.i = i;
+                    e.j = j;
+                    e.val = (i == j - size) ? 1 : 0;
+                    e.div = 1;
+                    e.added_val = (i == j) ? 1 : 0;
+                    elems.push_back(e);
                 }
             }
         }
 
-        p = get_item(i, i);
-        
-        for (tj = 0; tj < 4; tj++) {
-            tmp[i][tj] = matrix[i][tj];
+        int32_t get_item(int32_t ii, int32_t jj)
+        {
+            /*int32_t f = 0;
+
+            if (jj > size) {
+                jj -= size;
+                f = 1;
+            }*/
+            
+            for (int32_t i = 0; i < elems.size(); i++) {
+                if (elems[i].i == ii && elems[i].j == jj) {
+                    //if (f) {
+                        //return elems[i].added_val;
+                   // }
+                    //return (matrix_type == MAIN_MATRIX) 
+                        return elems[i].val;
+                        //: elems[i].added_val;
+                }
+            }
+
+            return -1;
         }
 
-        copy_matrix(matrix, tmp);
-        print(matrix);
-    }
+        int32_t set_item(int32_t ii, int32_t jj, 
+                         int32_t matrix_type, int32_t val)
+        {
+            int32_t f = 0;
 
-    return;
-}*/
+            if (ii > size || jj > size) {
+                if (jj > size)
+                    jj -= size;
 
-void print(int32_t m[A][B])
-{
-    int32_t i, j;
-    for (i = 0; i < A; i ++) {
-        for (j = 0; j < B; j++) {
-            printf("%d ", m[i][j]);
+                f = 1;
+            }
+
+            for (int32_t t = 0; t < elems.size(); t++) {
+                if (elems[t].i == ii && elems[t].j == jj) {
+                    /*if (f) {
+                        elems[t].added_val = val;
+                        return 1;
+                    }*/
+                    (matrix_type == MAIN_MATRIX) 
+                        ? elems[t].val = val 
+                        : elems[t].added_val = val;
+                    break;
+                }
+            }
+
+            return 0;
         }
-        printf("\n");
-    }
-    printf("\n");
-}
 
-int
-main()
+        //заполняет диагональные эелементы нулями не нужно?? 
+        void configure_added_matrix()
+        {
+            for (int32_t i = 0; i < size; i++) {
+                set_item(i, i, ADDED_MATRIX, 1);
+            }
+        }
+
+        void print(int32_t matrix_type)
+        {
+            if (matrix_type == MAIN_MATRIX) {
+                for (int32_t i = 1; i < size + 1; i++) {
+                    for (int32_t j = 1; j < size + 1; j++) {
+                        printf("%d ", get_item(i, j));
+                    }
+                    printf("\n");
+                }
+                printf("\n");
+            } else {
+                 for (int32_t i = 1; i < size + 1; i++) {
+                    for (int32_t j = size + 1; j <= size * 2; j++) {
+                        printf("%d ", get_item(i, j));
+                    }
+                    printf("\n");
+                }
+                printf("\n");
+            }
+         }
+
+        int32_t bareis1(int32_t index, int32_t p)
+        {
+            std::vector<elem_t> tmp(elems);
+            int32_t ret = get_item(index, index);
+
+            for (int32_t i = 1; i <= size; i++) {
+                for (int32_t j = 1; j <= 2 * size; j++) {
+                    if (i != index) {
+                        int32_t flag    = 0,
+                                new_val = (get_item(index, index) * get_item(i, j)
+                                                -get_item(i, index) * get_item(index, j)) / p;
+                        //printf("a%d%d %d\n", i, index, get_item(i, index, MAIN_MATRIX));
+                        //printf("a%d%d %d\n", index, j, get_item(index, j, MAIN_MATRIX));
+                        //set_item(i, j, MAIN_MATRIX, new_val);
+
+                        /*if (j > size) {
+                            //if (i > size)
+                                //i -= size;
+                           // printf("flg\n"); 
+                            flag = 1;
+                        }*/
+
+                        for (int32_t t = 0; t < tmp.size(); t++) {
+                            if (tmp[t].i == i && tmp[t].j == /*(flag) ? j - size :*/ j) {
+                                /*if (flag) {
+                                    tmp[t].added_val = new_val;
+                                } else {*/
+                                    //set_item(i, j, MAIN_MATRIX, 0);
+                                    tmp[t].val = new_val;
+                                //}
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            elems = tmp;
+
+            return ret;
+        }
+
+        void calc_bareis()
+        {
+            int32_t i = 1, p = 1;
+
+            while (i <= size) {
+                p = bareis1(i, p);
+                print(MAIN_MATRIX);
+                print(~MAIN_MATRIX);
+                i++;
+            }
+        }
+};
+
+int main()
 {
-    //bareis();
-    //bareis1(matrix, 7, 1);
-    print(matrix);
+    CBareisMatrix *bm = new CBareisMatrix;
 
-    int32_t i = 0, p = 1;
+    bm->add(1, 1, 8);
+    bm->add(1, 2, 5);
+    bm->add(1, 3, 6);
 
-    while (i < A) {
-        p = bareis1(matrix, p, i);
-        print(matrix);
-        i++;
-    }
+    bm->add(2, 1, 7);
+    bm->add(2, 2, 6);
+    bm->add(2, 3, 7);
 
-    return;
+    bm->add(3, 1, 2);
+    bm->add(3, 2, 3);
+    bm->add(3, 3, 1);
+
+    bm->size = 3;
+    bm->create_added_matrix();
+    bm->print(MAIN_MATRIX);
+
+    bm->print(ADDED_MATRIX);
+
+    bm->calc_bareis();
+    //bm->bareis1(1, 1);
+    //bm->print(MAIN_MATRIX);
+
+    //printf("%d\n", bm->get_item(1, 4, MAIN_MATRIX));
+    return 0;
 }
