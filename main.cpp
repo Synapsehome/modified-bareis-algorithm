@@ -45,6 +45,13 @@ class CBareisMatrix
             }
         }
 
+        void print_nums()
+        {
+            for (int32_t i = 0; i < elems.size(); i++)
+                printf("%d%d ", elems[i].i, elems[i].j);
+            printf("\n");
+        }
+
         int32_t get_item(int32_t ii, int32_t jj)
         {
             /*int32_t f = 0;
@@ -184,28 +191,33 @@ int main()
 {
     CBareisMatrix *bm = new CBareisMatrix;
 
-    bm->add(1, 1, 8);
-    bm->add(1, 2, 5);
+    bm->add(1, 1, 32);
+    bm->add(1, 2, 6);
     bm->add(1, 3, 6);
+    bm->add(1, 4, 32);
 
-    bm->add(2, 1, 7);
+    bm->add(2, 1, 65);
     bm->add(2, 2, 6);
-    bm->add(2, 3, 7);
+    bm->add(2, 3, 45);
+    bm->add(2, 4, 24);
 
     bm->add(3, 1, 2);
-    bm->add(3, 2, 3);
+    bm->add(3, 2, 75);
     bm->add(3, 3, 1);
+    bm->add(3, 4, 43);
 
-    bm->size = 3;
+    bm->add(4, 1, 4);
+    bm->add(4, 2, 7);
+    bm->add(4, 3, 0);
+    bm->add(4, 4, 34);
+
+    bm->size = 4;
     bm->create_added_matrix();
-    bm->print(MAIN_MATRIX);
 
+    bm->print(MAIN_MATRIX);
     bm->print(ADDED_MATRIX);
+    bm->print_nums();
 
     bm->calc_bareis();
-    //bm->bareis1(1, 1);
-    //bm->print(MAIN_MATRIX);
-
-    //printf("%d\n", bm->get_item(1, 4, MAIN_MATRIX));
     return 0;
 }
