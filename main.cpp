@@ -8,7 +8,7 @@
 struct elem_t
 {
     int32_t val,        // val - значение эелемента в исходной матрице
-            added_val,   // значение в присоединённой единичной матрице
+            added_val,  // значение в присоединённой единичной матрице
             div,        // div - на что его потом поделить
             i, j;       // индексы в матрице
 };
@@ -54,21 +54,9 @@ class CBareisMatrix
 
         int32_t get_item(int32_t ii, int32_t jj)
         {
-            /*int32_t f = 0;
-
-            if (jj > size) {
-                jj -= size;
-                f = 1;
-            }*/
-            
             for (int32_t i = 0; i < elems.size(); i++) {
                 if (elems[i].i == ii && elems[i].j == jj) {
-                    //if (f) {
-                        //return elems[i].added_val;
-                   // }
-                    //return (matrix_type == MAIN_MATRIX) 
-                        return elems[i].val;
-                        //: elems[i].added_val;
+                    return elems[i].val;
                 }
             }
 
@@ -89,10 +77,6 @@ class CBareisMatrix
 
             for (int32_t t = 0; t < elems.size(); t++) {
                 if (elems[t].i == ii && elems[t].j == jj) {
-                    /*if (f) {
-                        elems[t].added_val = val;
-                        return 1;
-                    }*/
                     (matrix_type == MAIN_MATRIX) 
                         ? elems[t].val = val 
                         : elems[t].added_val = val;
@@ -101,14 +85,6 @@ class CBareisMatrix
             }
 
             return 0;
-        }
-
-        //заполняет диагональные эелементы нулями не нужно?? 
-        void configure_added_matrix()
-        {
-            for (int32_t i = 0; i < size; i++) {
-                set_item(i, i, ADDED_MATRIX, 1);
-            }
         }
 
         void print(int32_t matrix_type)
@@ -143,25 +119,9 @@ class CBareisMatrix
                         int32_t flag    = 0,
                                 new_val = (get_item(index, index) * get_item(i, j)
                                                 -get_item(i, index) * get_item(index, j)) / p;
-                        //printf("a%d%d %d\n", i, index, get_item(i, index, MAIN_MATRIX));
-                        //printf("a%d%d %d\n", index, j, get_item(index, j, MAIN_MATRIX));
-                        //set_item(i, j, MAIN_MATRIX, new_val);
-
-                        /*if (j > size) {
-                            //if (i > size)
-                                //i -= size;
-                           // printf("flg\n"); 
-                            flag = 1;
-                        }*/
-
                         for (int32_t t = 0; t < tmp.size(); t++) {
-                            if (tmp[t].i == i && tmp[t].j == /*(flag) ? j - size :*/ j) {
-                                /*if (flag) {
-                                    tmp[t].added_val = new_val;
-                                } else {*/
-                                    //set_item(i, j, MAIN_MATRIX, 0);
+                            if (tmp[t].i == i && tmp[t].j == j) {
                                     tmp[t].val = new_val;
-                                //}
                                 break;
                             }
                         }
@@ -170,7 +130,6 @@ class CBareisMatrix
             }
 
             elems = tmp;
-
             return ret;
         }
 
@@ -219,5 +178,7 @@ int main()
     bm->print_nums();
 
     bm->calc_bareis();
+
+    delete bm;
     return 0;
 }
