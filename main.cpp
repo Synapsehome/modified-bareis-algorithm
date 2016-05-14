@@ -1,9 +1,29 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <vector>
+#include <algorithm>
 
 #define MAIN_MATRIX  0
 #define ADDED_MATRIX 1
+
+#define ROW 1
+#define COLUMN 0
+
+int32_t gcd(int32_t a, int32_t b)
+{
+    a = (a < 0) ? -a : a;
+    b = (b < 0) ? -b : b;
+
+    while (a != 0 && b != 0) {
+        if (a > b) {
+            a %= b;
+        } else {
+            b %= a;
+        }
+    }
+
+    return a + b;
+}
 
 struct elem_t
 {
@@ -16,7 +36,7 @@ struct elem_t
 class CBareisMatrix
 {
     public:
-        int32_t size;
+        int32_t size, d;
         std::vector<elem_t> elems;
 
         void add(int32_t i, int32_t j, int32_t val)
@@ -108,6 +128,21 @@ class CBareisMatrix
             }
          }
 
+        void print_reslut_matrix()
+        {
+            printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+            for (int32_t i = 1; i < size + 1; i++) {
+                for (int32_t j = size + 1; j <= size * 2; j++) {
+                    int32_t _gcd = gcd(get_item(i, j), d);
+                    printf("%d/%d| ", get_item(i, j) / _gcd, 
+                                      d / _gcd);
+                    //printf("%d ", get_item(i, j));
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+
         int32_t bareis1(int32_t index, int32_t p)
         {
             std::vector<elem_t> tmp(elems);
@@ -143,6 +178,44 @@ class CBareisMatrix
                 print(~MAIN_MATRIX);
                 i++;
             }
+
+            d = get_item(size, size);
+        }
+
+        int32_t nod_row_column(int32_t index, int32_t type)
+        {
+            switch (type) {
+                case ROW:
+                    {
+                        int32_t *arr = new int[size];
+                        int32_t max;
+                        
+                        for (int32_t j = 1; j <= size; j++) {
+                            arr[j - 1] = get_item(index, j);
+                        }
+
+                        std::sort(arr, arr + size);
+
+                        for (int tmp = 1; tmp <= arr[0]; ++tmp) {
+                            int32_t b = 0;
+
+                            for (int i = 0; i < size; ++i) {
+                                if (arr[i] % tmp != 0) {
+                                    b = 1;
+                                    break;
+                                }
+                            }
+
+                            if (!b) {
+                                max = tmp;
+                            }
+                        }
+
+                        delete [] arr;
+                        return max;
+                    }
+                    break;
+            }
         }
 };
 
@@ -155,9 +228,9 @@ int main()
     bm->add(1, 3, 6);
     bm->add(1, 4, 32);
 
-    bm->add(2, 1, 65);
+    bm->add(2, 1, 6);
     bm->add(2, 2, 6);
-    bm->add(2, 3, 45);
+    bm->add(2, 3, 4);
     bm->add(2, 4, 24);
 
     bm->add(3, 1, 2);
@@ -173,11 +246,19 @@ int main()
     bm->size = 4;
     bm->create_added_matrix();
 
+    //printf("gcd 1 row: %d\n", bm->nod_row_column(3, ROW));
+
     bm->print(MAIN_MATRIX);
     bm->print(ADDED_MATRIX);
-    bm->print_nums();
+    //bm->print_nums();
 
     bm->calc_bareis();
+
+    //printf("det: %d\n", bm->d);
+
+    bm->print_reslut_matrix();
+
+    //printf("gcd: %d\n", gcd(-5, -11));
 
     delete bm;
     return 0;
